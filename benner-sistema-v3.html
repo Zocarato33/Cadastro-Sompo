@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SBK — Gestão de Processos</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --vd:#023631; --vd2:#012824; --ci:#075056; --ci2:#2A7C79; --vl:#0A5A52;
+  --off:#ECEFF3; --off2:#DDE4EC; --ch:#4A545E; --ch2:#6B7785; --w:#FFFFFF;
+  --bord:#D1D9E0; --bord2:#B8C5CF;
+  --ok:#1D9E75; --ok-bg:#E1F5EE;
+  --warn:#E6A817; --warn-bg:#FFF7E0;
+  --err:#C0392B; --err-bg:#FEF0EF;
+  --info:#2563EB; --info-bg:#EEF4FF;
+  --hdi:#7C3AED; --hdi-bg:#F3F0FF;
+  --r:14px; --r-sm:8px;
+  --sh:0 2px 14px rgba(2,54,49,.09); --sh2:0 8px 32px rgba(2,54,49,.16);
+  --font:'Plus Jakarta Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--off);color:#1A2830;min-height:100vh}
+
+/* TOPBAR */
+.topbar{height:58px;background:var(--vd);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;position:sticky;top:0;z-index:500;box-shadow:0 2px 12px rgba(2,54,49,.3)}
+.tb-brand{display:flex;align-items:center;gap:10px;cursor:pointer}
+.tb-logo{display:flex;flex-direction:column;gap:3px}
+.tb-logo span{display:block;border-radius:3px}
+.tb-logo span:nth-child(1){width:20px;height:10px;background:var(--ci2)}
+.tb-logo span:nth-child(2){width:14px;height:10px;background:var(--vl);margin-left:6px}
+.tb-name{font-size:16px;font-weight:800;color:#fff;letter-spacing:.04em}
+.tb-sep{width:1px;height:22px;background:rgba(255,255,255,.15);margin:0 12px}
+.tb-page{font-size:11px;font-weight:300;color:rgba(255,255,255,.5);letter-spacing:.06em;text-transform:uppercase}
+.tb-right{display:flex;align-items:center;gap:10px}
+.tb-badge{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:99px;padding:4px 14px;font-size:11px;font-weight:500;color:rgba(255,255,255,.7)}
+.tb-btn{background:var(--ci2);color:#fff;border:none;border-radius:var(--r-sm);padding:7px 16px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:background .15s}
+.tb-btn:hover{background:var(--vl)}
+
+/* BREADCRUMB */
+.breadcrumb{display:flex;align-items:center;gap:6px;padding:.65rem 2rem;font-size:12px;color:var(--ch2);border-bottom:1px solid var(--bord);background:var(--w)}
+.breadcrumb span{cursor:pointer;transition:color .15s}.breadcrumb span:hover{color:var(--ci)}
+.breadcrumb span.active{color:var(--vd);font-weight:700;cursor:default}
+.breadcrumb .sep{color:var(--bord2)}
+
+/* MAIN */
+.main{max-width:1200px;margin:0 auto;padding:2.5rem 2rem 4rem}
+.view{display:none}.view.active{display:block}
+
+/* PAGE HEADER */
+.page-hd{margin-bottom:2rem}
+.page-hd h1{font-size:26px;font-weight:800;color:var(--vd);margin-bottom:5px}
+.page-hd p{font-size:13px;font-weight:300;color:var(--ch);line-height:1.6;max-width:540px}
+.page-hd-row{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+
+/* KPI BAR */
+.kpi-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:2rem}
+.kpi{background:var(--w);border:1px solid var(--bord);border-radius:var(--r);padding:1.1rem 1.25rem;position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--kpi-c,var(--ci))}
+.kpi-val{font-size:28px;font-weight:800;color:var(--vd);line-height:1}
+.kpi-label{font-size:10px;font-weight:700;color:var(--ch);text-transform:uppercase;letter-spacing:.07em;margin-top:5px}
+
+/* HOME CARDS */
+.home-section-title{font-size:11px;font-weight:700;color:var(--ch);text-transform:uppercase;letter-spacing:.09em;margin-bottom:1rem}
+.home-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-bottom:2.5rem}
+.home-card{background:var(--w);border:1px solid var(--bord);border-radius:var(--r);cursor:pointer;overflow:hidden;transition:transform .2s,box-shadow .2s,border-color .2s;display:flex;flex-direction:column}
+.home-card:hover{transform:translateY(-4px);box-shadow:var(--sh2);border-color:var(--bord2)}
+.hc-top{padding:1.3rem 1.3rem 1.1rem;background:linear-gradient(135deg,var(--hc-a),var(--hc-b));display:flex;align-items:flex-start;justify-content:space-between}
+.hc-icon{width:44px;height:44px;border-radius:11px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center}
+.hc-icon svg{width:21px;height:21px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hc-step{font-size:10px;font-weight:700;color:rgba(255,255,255,.8);background:rgba(255,255,255,.18);border-radius:99px;padding:3px 10px;text-transform:uppercase;letter-spacing:.07em}
+.hc-body{padding:1.1rem 1.3rem 1.3rem;flex:1;display:flex;flex-direction:column;gap:8px}
+.hc-title{font-size:16px;font-weight:800;color:var(--vd)}
+.hc-desc{font-size:12px;font-weight:300;color:var(--ch);line-height:1.55}
+.hc-mini{margin-top:auto}
+.hc-bar{height:4px;background:var(--off2);border-radius:99px;overflow:hidden}
+.hc-fill{height:100%;border-radius:99px;background:var(--hc-bar,var(--ci));transition:width .4s ease}
+.hc-lbl{display:flex;justify-content:space-between;margin-top:4px}
+.hc-lbl span{font-size:10px;font-weight:500;color:var(--ch)}
+.hc-lbl strong{font-size:10px;font-weight:800;color:var(--vd)}
+
+/* BACK BTN */
+.btn-back{display:inline-flex;align-items:center;gap:6px;background:var(--w);border:1px solid var(--bord);border-radius:var(--r-sm);padding:7px 14px;font-family:var(--font);font-size:12px;font-weight:600;color:var(--ch);cursor:pointer;transition:all .15s;margin-bottom:1.5rem}
+.btn-back:hover{background:var(--off);color:var(--vd)}
+.btn-back svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round}
+
+/* OPERATION CARDS */
+.op-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:1rem;margin-bottom:2rem}
+.op-card{background:var(--w);border:1px solid var(--bord);border-radius:var(--r);padding:1.2rem 1.1rem 1rem;cursor:pointer;overflow:hidden;position:relative;transition:transform .18s,box-shadow .18s,border-color .18s;display:flex;flex-direction:column;gap:9px}
+.op-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--oc-acc,var(--ci))}
+.op-card:hover{transform:translateY(-3px);box-shadow:var(--sh2);border-color:var(--bord2)}
+.op-card.done{border-color:var(--ok)}.op-card.done::before{background:var(--ok)}
+.oc-icon{width:38px;height:38px;border-radius:9px;background:var(--oc-ibg,#E4EEF0);display:flex;align-items:center;justify-content:center}
+.oc-icon svg{width:17px;height:17px}
+.oc-title{font-size:14px;font-weight:800;color:var(--vd)}
+.oc-meta{font-size:11px;font-weight:300;color:var(--ch);margin-top:-4px}
+.oc-srow{display:flex;align-items:center;gap:5px}
+.s-pill{font-size:10px;font-weight:700;padding:3px 9px;border-radius:99px;background:var(--off);color:var(--ch)}
+.s-pill.done{background:var(--ok-bg);color:#0F6E56}
+.oc-bar{height:4px;background:var(--off2);border-radius:99px;overflow:hidden;margin-top:2px}
+.oc-fill{height:100%;border-radius:99px;background:var(--oc-acc,var(--ci));transition:width .35s}
+.op-card.done .oc-fill{background:var(--ok)}
+.oc-pct{font-size:10px;font-weight:700;color:var(--ch);text-align:right;margin-top:2px}
+.op-card.done .oc-pct{color:#0F6E56}
+
+/* PROGRESS GLOBAL */
+.prog-global{background:var(--w);border:1px solid var(--bord);border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.75rem;display:flex;align-items:center;gap:1.5rem}
+.prog-label{font-size:11px;font-weight:700;color:var(--ch);text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
+.prog-wrap{flex:1;height:6px;background:var(--off2);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--ci),var(--ci2));border-radius:99px;transition:width .4s ease}
+.prog-count{font-size:12px;font-weight:700;color:var(--vd);white-space:nowrap}
+
+/* DRAWER */
+.drawer-wrap{display:none;position:fixed;inset:0;z-index:600}
+.drawer-wrap.open{display:flex}
+.drawer-overlay{position:absolute;inset:0;background:rgba(1,40,36,.5);backdrop-filter:blur(4px)}
+.drawer{position:absolute;top:0;right:0;bottom:0;width:min(700px,100vw);background:var(--w);display:flex;flex-direction:column;animation:slideIn .28s cubic-bezier(.22,1,.36,1)}
+@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.dh{background:var(--vd);padding:1.2rem 1.75rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.dh-l{display:flex;flex-direction:column;gap:2px}
+.dh-tag{font-size:10px;font-weight:700;color:var(--ci2);text-transform:uppercase;letter-spacing:.1em}
+.dh-title{font-size:19px;font-weight:800;color:#fff}
+.dh-sub{font-size:11px;font-weight:300;color:rgba(255,255,255,.5)}
+.btn-x{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.1);border:none;color:#fff;cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.btn-x:hover{background:rgba(255,255,255,.2)}
+.dp-bar{height:3px;background:rgba(255,255,255,.1);flex-shrink:0}
+.dp-fill{height:100%;background:var(--ci2);transition:width .3s}
+.drawer-body{flex:1;overflow-y:auto;padding:1.75rem;display:flex;flex-direction:column;gap:1.1rem}
+.drawer-foot{padding:1rem 1.75rem;border-top:1px solid var(--bord);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:1rem;background:var(--w)}
+.foot-note{font-size:11px;font-weight:300;color:var(--ch)}
+.foot-actions{display:flex;gap:8px}
+.btn-cancel{background:var(--off);color:var(--ch);border:1px solid var(--bord);border-radius:var(--r-sm);padding:9px 16px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:background .15s}
+.btn-cancel:hover{background:var(--off2)}
+.btn-save{background:var(--vd);color:#fff;border:none;border-radius:var(--r-sm);padding:9px 20px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:background .18s}
+.btn-save:hover{background:var(--ci)}
+
+/* FORM */
+.fg{background:var(--off);border-radius:10px;padding:1.2rem;display:flex;flex-direction:column;gap:.9rem}
+.fg-title{font-size:10px;font-weight:800;color:var(--ci);text-transform:uppercase;letter-spacing:.09em;padding-bottom:.5rem;border-bottom:1px solid var(--bord);margin-bottom:.1rem}
+.frow{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:1rem}
+.field{display:flex;flex-direction:column;gap:5px}
+.field.full{grid-column:1/-1}
+label{font-size:11px;font-weight:700;color:var(--ch);display:flex;align-items:center;gap:4px}
+label .req{color:var(--ci2);font-size:13px;line-height:1}
+.fnum{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--ci);color:#fff;font-size:9px;font-weight:800;flex-shrink:0}
+input,select,textarea{font-family:var(--font);font-size:13px;color:#1A2830;background:var(--w);border:1px solid var(--bord);border-radius:7px;padding:9px 12px;transition:border-color .15s,box-shadow .15s;width:100%;appearance:none}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ci2);box-shadow:0 0 0 3px rgba(42,124,121,.12)}
+input::placeholder,textarea::placeholder{color:#A0ADB5}
+textarea{resize:vertical;min-height:68px;line-height:1.5}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234A545E' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:30px;cursor:pointer}
+.radio-group{display:flex;gap:8px;flex-wrap:wrap}
+.radio-opt{display:flex;align-items:center;gap:7px;cursor:pointer;background:var(--w);border:1.5px solid var(--bord);border-radius:8px;padding:8px 14px;font-size:13px;font-weight:500;color:var(--ch);transition:all .15s;user-select:none}
+.radio-opt.selected{border-color:var(--ci2);background:#EBF5F5;color:var(--vd);font-weight:700}
+.radio-dot{width:13px;height:13px;border-radius:50%;border:2px solid var(--bord);transition:all .15s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.radio-opt.selected .radio-dot{border-color:var(--ci2);background:var(--ci2)}
+.radio-opt.selected .radio-dot::after{content:'';width:5px;height:5px;border-radius:50%;background:#fff}
+
+/* REPEAT */
+.rep-section{display:flex;flex-direction:column;gap:.85rem}
+.rep-item{background:var(--w);border:1px solid var(--bord);border-radius:10px;padding:1.1rem;position:relative}
+.rep-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem}
+.rep-label{font-size:11px;font-weight:800;color:var(--vd);display:flex;align-items:center;gap:7px}
+.btn-rem{background:none;border:1px solid var(--bord);color:var(--err);border-radius:5px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer}
+.btn-rem:hover{background:var(--err-bg)}
+.btn-add{background:var(--off);border:1.5px dashed var(--bord2);color:var(--ci);border-radius:8px;padding:9px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;width:100%;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-add:hover{background:#E4EEF0;border-color:var(--ci2)}
+.btn-add svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round}
+
+/* ALERT */
+.alert{border-radius:10px;padding:.9rem 1.1rem;display:flex;align-items:flex-start;gap:9px;font-size:12px;line-height:1.5}
+.alert svg{flex-shrink:0;width:17px;height:17px;margin-top:1px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.alert.warn{background:var(--warn-bg);border:1px solid #F0C842;color:#7A5010}
+.alert.info{background:var(--info-bg);border:1px solid #93B4F8;color:#1E3A8A}
+.alert.ok{background:var(--ok-bg);border:1px solid #6ED8B4;color:#0A5A38}
+.alert.hdi{background:var(--hdi-bg);border:1px solid #C4B5FD;color:#4C1D95}
+.alert strong{font-weight:700}
+
+/* DIST TABLE */
+.dist-toolbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;background:var(--w);border:1px solid var(--bord);border-radius:var(--r);padding:1rem 1.5rem;margin-bottom:1.25rem;flex-wrap:wrap}
+.dt-left{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap}
+.dt-search{position:relative;display:flex;align-items:center}
+.dt-search input{width:230px;padding-left:34px;border-radius:8px;font-size:12px}
+.dt-search svg{position:absolute;left:10px;width:14px;height:14px;stroke:var(--ch2);fill:none;stroke-width:2;stroke-linecap:round}
+.f-sel{width:150px;font-size:12px;padding:8px 28px 8px 10px}
+.dt-stats{display:flex;gap:1.5rem}
+.dt-stat{text-align:right}
+.dt-stat-n{font-size:20px;font-weight:800;color:var(--vd);line-height:1}
+.dt-stat-l{font-size:10px;font-weight:700;color:var(--ch);text-transform:uppercase;letter-spacing:.06em}
+
+.dist-wrap{background:var(--w);border:1px solid var(--bord);border-radius:var(--r);overflow:hidden}
+.dist-tbl{width:100%;border-collapse:collapse}
+.dist-tbl thead tr{background:var(--vd)}
+.dist-tbl thead th{padding:11px 15px;font-size:10px;font-weight:700;color:rgba(255,255,255,.7);text-align:left;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+.dist-tbl tbody tr{border-bottom:1px solid var(--off2);transition:background .12s}
+.dist-tbl tbody tr:last-child{border-bottom:none}
+.dist-tbl tbody tr:hover{background:#F5F8FA}
+.dist-tbl td{padding:12px 15px;font-size:13px;vertical-align:middle}
+.dist-tbl td:first-child{font-weight:700;color:var(--vd)}
+.proc-num{font-size:10px;font-weight:700;color:var(--ci2);display:block;margin-top:2px}
+.emp-b{font-size:10px;font-weight:800;padding:3px 9px;border-radius:99px;text-transform:uppercase;letter-spacing:.05em}
+.emp-b.sompo{background:#E8F0FE;color:#1D4ED8}
+.emp-b.hdi{background:var(--hdi-bg);color:#4C1D95}
+.val-cell{font-size:12px;font-weight:700;color:var(--vd);white-space:nowrap}
+.val-hi{font-size:10px;font-weight:700;color:var(--err);display:flex;align-items:center;gap:3px;margin-top:2px}
+.st-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:99px}
+.st-badge .dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.st-badge.pendente{background:var(--warn-bg);color:#7A5010}
+.st-badge.analise{background:var(--info-bg);color:#1E3A8A}
+.st-badge.concluido{background:var(--ok-bg);color:#0A5A38}
+.st-badge.reprovado{background:var(--err-bg);color:var(--err)}
+.pr-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:99px}
+.pr-badge.alta{background:#FEF2F2;color:#991B1B}
+.pr-badge.media{background:#FFF7E0;color:#92400E}
+.pr-badge.normal{background:var(--off);color:var(--ch)}
+.btn-atrib{background:var(--ci);color:#fff;border:none;border-radius:6px;padding:6px 13px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;transition:background .15s;white-space:nowrap}
+.btn-atrib:hover{background:var(--vd)}
+.btn-atrib.done{background:var(--ok);cursor:default}
+.tbl-empty{text-align:center;padding:3.5rem;color:var(--ch2);font-size:13px;font-weight:300}
+.tbl-empty strong{display:block;font-size:17px;font-weight:700;color:var(--vd);margin-bottom:5px}
+.dist-footer{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.5rem;border-top:1px solid var(--bord);font-size:12px;color:var(--ch)}
+.pg-btns{display:flex;gap:4px}
+.pg-btn{width:29px;height:29px;display:flex;align-items:center;justify-content:center;border:1px solid var(--bord);border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;color:var(--ch);background:var(--w);transition:all .12s}
+.pg-btn:hover,.pg-btn.active{background:var(--vd);color:#fff;border-color:var(--vd)}
+
+/* HDI ANÁLISE VIEW */
+.hdi-toolbar{display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;flex-wrap:wrap}
+.hdi-tbl{width:100%;border-collapse:collapse}
+.hdi-tbl thead tr{background:var(--hdi)}
+.hdi-tbl thead th{padding:11px 15px;font-size:10px;font-weight:700;color:rgba(255,255,255,.8);text-align:left;text-transform:uppercase;letter-spacing:.08em}
+.hdi-tbl tbody tr{border-bottom:1px solid var(--off2);transition:background .12s}
+.hdi-tbl tbody tr:hover{background:#FAF8FF}
+.hdi-tbl td{padding:13px 15px;font-size:13px;vertical-align:middle}
+.hdi-tbl td:first-child{font-weight:700;color:var(--vd)}
+.btn-apr{background:var(--ok);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;transition:background .15s;margin-right:6px}
+.btn-apr:hover{background:#0F6E56}
+.btn-rep{background:var(--err-bg);color:var(--err);border:1px solid #FCA5A5;border-radius:6px;padding:6px 14px;font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;transition:background .15s}
+.btn-rep:hover{background:#FEE2E2}
+
+/* MODAL */
+.modal-wrap{display:none;position:fixed;inset:0;z-index:700;align-items:center;justify-content:center}
+.modal-wrap.open{display:flex}
+.modal-overlay{position:absolute;inset:0;background:rgba(1,40,36,.55);backdrop-filter:blur(5px)}
+.modal{position:relative;background:var(--w);border-radius:var(--r);width:min(520px,95vw);max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(2,54,49,.25);animation:popIn .22s cubic-bezier(.22,1,.36,1)}
+@keyframes popIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+.modal-head{padding:1.5rem 1.75rem 1.25rem;border-bottom:1px solid var(--bord);display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.modal-head-l h3{font-size:18px;font-weight:800;color:var(--vd);margin-bottom:3px}
+.modal-head-l p{font-size:12px;font-weight:300;color:var(--ch)}
+.modal-body{padding:1.5rem 1.75rem;display:flex;flex-direction:column;gap:1.1rem}
+.modal-foot{padding:1rem 1.75rem;border-top:1px solid var(--bord);display:flex;align-items:center;justify-content:flex-end;gap:10px}
+.proc-preview{background:var(--off);border-radius:10px;padding:1rem 1.25rem;display:flex;flex-direction:column;gap:4px}
+.proc-preview-title{font-size:11px;font-weight:700;color:var(--ch);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+.proc-preview-row{display:flex;justify-content:space-between;font-size:13px}
+.proc-preview-row span{color:var(--ch);font-weight:300}
+.proc-preview-row strong{color:var(--vd);font-weight:700}
+.pri-select-group{display:flex;gap:8px}
+.pri-opt{flex:1;border:1.5px solid var(--bord);border-radius:8px;padding:8px 10px;text-align:center;cursor:pointer;transition:all .15s;font-size:12px;font-weight:600;color:var(--ch)}
+.pri-opt:hover{border-color:var(--bord2)}
+.pri-opt.alta.sel{border-color:#EF4444;background:#FEF2F2;color:#991B1B}
+.pri-opt.media.sel{border-color:var(--warn);background:var(--warn-bg);color:#92400E}
+.pri-opt.normal.sel{border-color:var(--ci2);background:#EBF5F5;color:var(--vd)}
+
+/* EMAIL MODAL */
+.email-preview{background:#F8FAFF;border:1px solid #BFDBFE;border-radius:10px;padding:1.25rem;font-size:13px;line-height:1.7;color:#1E3A8A;white-space:pre-line}
+.email-field{margin-bottom:.75rem}
+.email-field label{font-size:11px;font-weight:700;color:var(--ch);display:block;margin-bottom:4px}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(16px);background:var(--vd);color:#fff;padding:11px 20px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:all .28s ease;z-index:900;white-space:nowrap;box-shadow:var(--sh2)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* HDI badge on home card */
+.hdi-count-badge{background:var(--hdi-bg);color:var(--hdi);border-radius:99px;padding:2px 10px;font-size:10px;font-weight:800;border:1px solid #C4B5FD}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-brand" onclick="goHome()">
+    <div class="tb-logo"><span></span><span></span></div>
+    <span class="tb-name">SBK</span>
+    <div class="tb-sep"></div>
+    <span class="tb-page" id="tb-page">Gestão de Processos</span>
+  </div>
+  <div class="tb-right">
+    <span class="tb-badge">Legal Operations</span>
+    <button class="tb-btn" onclick="goHome()">Início</button>
+  </div>
+</div>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb" id="breadcrumb">
+  <span class="active">Início</span>
+</div>
+
+<div class="main">
+
+<!-- ════════════════ HOME ════════════════ -->
+<div class="view active" id="view-home">
+  <div class="page-hd">
+    <h1>Painel de Processos</h1>
+    <p>Gerencie o ciclo completo — da triagem ao cadastro Benner e distribuição por analistas.</p>
+  </div>
+
+  <div class="kpi-bar">
+    <div class="kpi" style="--kpi-c:var(--warn)"><div class="kpi-val" id="k-triagem">0</div><div class="kpi-label">Aguardando Triagem</div></div>
+    <div class="kpi" style="--kpi-c:var(--hdi)"><div class="kpi-val" id="k-hdi">0</div><div class="kpi-label">Análise HDI</div></div>
+    <div class="kpi" style="--kpi-c:var(--ci)"><div class="kpi-val" id="k-op">0</div><div class="kpi-label">Em Operação</div></div>
+    <div class="kpi" style="--kpi-c:var(--info)"><div class="kpi-val" id="k-dist">0</div><div class="kpi-label">Pendentes Distrib.</div></div>
+    <div class="kpi" style="--kpi-c:var(--ok)"><div class="kpi-val" id="k-conc">0</div><div class="kpi-label">Concluídos</div></div>
+  </div>
+
+  <div class="home-section-title">Módulos do sistema</div>
+  <div class="home-cards">
+
+    <!-- TRIAGEM -->
+    <div class="home-card" style="--hc-a:#E6A817;--hc-b:#B8650A;--hc-bar:var(--warn)" onclick="goView('triagem')">
+      <div class="hc-top">
+        <div class="hc-icon"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+        <span class="hc-step">Passo 1</span>
+      </div>
+      <div class="hc-body">
+        <div class="hc-title">Triagem</div>
+        <div class="hc-desc">Recepção e classificação. Define empresa, valor e direciona o fluxo automaticamente.</div>
+        <div class="hc-mini">
+          <div class="hc-bar"><div class="hc-fill" id="hf-triagem" style="width:0%"></div></div>
+          <div class="hc-lbl"><span>Processos triados</span><strong id="hl-triagem">0</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANÁLISE HDI -->
+    <div class="home-card" style="--hc-a:#6D28D9;--hc-b:#4C1D95;--hc-bar:var(--hdi)" onclick="goView('hdi')">
+      <div class="hc-top">
+        <div class="hc-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+        <span class="hc-step">Passo 2</span>
+      </div>
+      <div class="hc-body">
+        <div class="hc-title">Análise HDI</div>
+        <div class="hc-desc">Fila de aprovação exclusiva para processos HDI. Gestor aprova ou reprova cada caso.</div>
+        <div class="hc-mini">
+          <div class="hc-bar"><div class="hc-fill" id="hf-hdi" style="width:0%"></div></div>
+          <div class="hc-lbl"><span>Pendentes aprovação</span><strong id="hl-hdi">0</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPERAÇÃO -->
+    <div class="home-card" style="--hc-a:#023631;--hc-b:#075056;--hc-bar:var(--ci)" onclick="goView('operacao')">
+      <div class="hc-top">
+        <div class="hc-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+        <span class="hc-step">Passo 3</span>
+      </div>
+      <div class="hc-body">
+        <div class="hc-title">Operação</div>
+        <div class="hc-desc">Cadastro completo no Benner com todos os 56 campos obrigatórios.</div>
+        <div class="hc-mini">
+          <div class="hc-bar"><div class="hc-fill" id="hf-op" style="width:0%"></div></div>
+          <div class="hc-lbl"><span>Campos preenchidos</span><strong id="hl-op">0 / 56</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISTRIBUIÇÃO -->
+    <div class="home-card" style="--hc-a:#1D9E75;--hc-b:#0A5A52;--hc-bar:var(--ok)" onclick="goView('distribuicao')">
+      <div class="hc-top">
+        <div class="hc-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><path d="M12 8v4M8.5 17.5L12 12M15.5 17.5L12 12"/></svg></div>
+        <span class="hc-step">Passo 4</span>
+      </div>
+      <div class="hc-body">
+        <div class="hc-title">Distribuição</div>
+        <div class="hc-desc">Atribuição dos processos aos analistas com prazo, prioridade e observação.</div>
+        <div class="hc-mini">
+          <div class="hc-bar"><div class="hc-fill" id="hf-dist" style="width:0%"></div></div>
+          <div class="hc-lbl"><span>Atribuídos</span><strong id="hl-dist">0</strong></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════ TRIAGEM ════════════════ -->
+<div class="view" id="view-triagem">
+  <button class="btn-back" onclick="goHome()"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Voltar</button>
+  <div class="page-hd-row">
+    <div class="page-hd"><h1>Triagem</h1><p>Recepção e classificação inicial dos processos recebidos.</p></div>
+    <button class="btn-save" onclick="openDrawer('triagem')">+ Nova Triagem</button>
+  </div>
+  <div class="dist-wrap">
+    <table class="dist-tbl">
+      <thead><tr><th>Processo / Parte</th><th>Empresa</th><th>Valor Apólice</th><th>Destino</th><th>Data</th><th>Ação</th></tr></thead>
+      <tbody id="tri-tbody"><tr><td colspan="6" class="tbl-empty"><strong>Nenhuma triagem registrada</strong>Clique em "+ Nova Triagem" para começar.</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════════ ANÁLISE HDI ════════════════ -->
+<div class="view" id="view-hdi">
+  <button class="btn-back" onclick="goHome()"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Voltar</button>
+  <div class="page-hd-row">
+    <div class="page-hd">
+      <h1>Análise HDI</h1>
+      <p>Fila de aprovação exclusiva para processos HDI. Aprovado envia e-mail à HDI. Reprovado segue para Operação.</p>
+    </div>
+  </div>
+  <div class="alert hdi" style="margin-bottom:1.25rem">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+    <div><strong>Fluxo HDI:</strong> Todos os processos HDI passam por esta fila antes de qualquer destinação. O gestor/supervisor analisa e decide: <strong>Aprovado</strong> dispara e-mail para a HDI e encaminha para Distribuição. <strong>Reprovado</strong> encaminha para Operação (cadastro Benner).</div>
+  </div>
+  <div class="dist-wrap">
+    <table class="hdi-tbl">
+      <thead><tr><th>Processo / Parte</th><th>Valor Apólice</th><th>Valor Causa</th><th>Data Recebimento</th><th>Status</th><th>Decisão</th></tr></thead>
+      <tbody id="hdi-tbody"><tr><td colspan="6" class="tbl-empty"><strong>Nenhum processo HDI pendente</strong>Os processos HDI aparecerão aqui após a triagem.</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════════ OPERAÇÃO ════════════════ -->
+<div class="view" id="view-operacao">
+  <button class="btn-back" onclick="goHome()"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Voltar</button>
+  <div class="page-hd"><h1>Operação — Cadastro Benner</h1><p>Preencha cada seção para completar o cadastro. Mínimo de 56 campos.</p></div>
+  <div class="prog-global">
+    <span class="prog-label">Progresso</span>
+    <div class="prog-wrap"><div class="prog-fill" id="pg-fill" style="width:0%"></div></div>
+    <span class="prog-count" id="pg-count">0 / 56 campos</span>
+  </div>
+  <div class="op-grid">
+    <div class="op-card" style="--oc-acc:#023631;--oc-ibg:#D5E5E2" onclick="openDrawer('capa')">
+      <div class="oc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#023631" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+      <div><div class="oc-title">Capa</div><div class="oc-meta">Geral + Valores</div></div>
+      <div class="oc-srow"><span class="s-pill" id="os-capa">Pendente</span><span style="font-size:10px;color:var(--ch);font-weight:300">15 campos</span></div>
+      <div><div class="oc-bar"><div class="oc-fill" id="of-capa" style="width:0%"></div></div><div class="oc-pct" id="op-capa">0%</div></div>
+    </div>
+    <div class="op-card" style="--oc-acc:#075056;--oc-ibg:#D3E8E7" onclick="openDrawer('processo')">
+      <div class="oc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#075056" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <div><div class="oc-title">Processo</div><div class="oc-meta">Dados judiciais</div></div>
+      <div class="oc-srow"><span class="s-pill" id="os-processo">Pendente</span><span style="font-size:10px;color:var(--ch);font-weight:300">15 campos</span></div>
+      <div><div class="oc-bar"><div class="oc-fill" id="of-processo" style="width:0%"></div></div><div class="oc-pct" id="op-processo">0%</div></div>
+    </div>
+    <div class="op-card" style="--oc-acc:#0A5A52;--oc-ibg:#D5E9E6" onclick="openDrawer('andamento')">
+      <div class="oc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#0A5A52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <div><div class="oc-title">Andamento</div><div class="oc-meta">Eventos processuais</div></div>
+      <div class="oc-srow"><span class="s-pill" id="os-andamento">Pendente</span><span style="font-size:10px;color:var(--ch);font-weight:300">3 por item</span></div>
+      <div><div class="oc-bar"><div class="oc-fill" id="of-andamento" style="width:0%"></div></div><div class="oc-pct" id="op-andamento">0%</div></div>
+    </div>
+    <div class="op-card" style="--oc-acc:#2A7C79;--oc-ibg:#D5E9E8" onclick="openDrawer('documentos')">
+      <div class="oc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#2A7C79" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+      <div><div class="oc-title">Documentos</div><div class="oc-meta">Indexação de peças</div></div>
+      <div class="oc-srow"><span class="s-pill" id="os-documentos">Pendente</span><span style="font-size:10px;color:var(--ch);font-weight:300">3 por item</span></div>
+      <div><div class="oc-bar"><div class="oc-fill" id="of-documentos" style="width:0%"></div></div><div class="oc-pct" id="op-documentos">0%</div></div>
+    </div>
+    <div class="op-card" style="--oc-acc:#0E4442;--oc-ibg:#D3E5E4" onclick="openDrawer('participantes')">
+      <div class="oc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#0E4442" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+      <div><div class="oc-title">Participantes</div><div class="oc-meta">Autor, Réu, Advogados</div></div>
+      <div class="oc-srow"><span class="s-pill" id="os-participantes">Pendente</span><span style="font-size:10px;color:var(--ch);font-weight:300">5 por participante</span></div>
+      <div><div class="oc-bar"><div class="oc-fill" id="of-participantes" style="width:0%"></div></div><div class="oc-pct" id="op-participantes">0%</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ DISTRIBUIÇÃO ════════════════ -->
+<div class="view" id="view-distribuicao">
+  <button class="btn-back" onclick="goHome()"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Voltar</button>
+  <div class="page-hd-row">
+    <div class="page-hd"><h1>Distribuição</h1><p>Atribua processos aos analistas com prazo, prioridade e observação.</p></div>
+    <button class="btn-save" onclick="addDemo()">+ Processo demo</button>
+  </div>
+  <div class="dist-toolbar">
+    <div class="dt-left">
+      <div class="dt-search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="d-search" placeholder="Buscar processo ou parte..." oninput="renderDist()">
+      </div>
+      <select class="f-sel" id="d-femp" onchange="renderDist()"><option value="">Todas as empresas</option><option>Sompo</option><option>HDI</option></select>
+      <select class="f-sel" id="d-fstat" onchange="renderDist()"><option value="">Todos os status</option><option value="Pendente">Pendente</option><option value="Em análise">Em análise</option><option value="Concluído">Concluído</option></select>
+    </div>
+    <div class="dt-stats">
+      <div class="dt-stat"><div class="dt-stat-n" id="ds-tot">0</div><div class="dt-stat-l">Total</div></div>
+      <div class="dt-stat"><div class="dt-stat-n" id="ds-pen">0</div><div class="dt-stat-l">Pendentes</div></div>
+      <div class="dt-stat"><div class="dt-stat-n" id="ds-atr">0</div><div class="dt-stat-l">Atribuídos</div></div>
+    </div>
+  </div>
+  <div class="dist-wrap">
+    <table class="dist-tbl">
+      <thead><tr><th>Processo / Parte</th><th>Empresa</th><th>Valor Apólice</th><th>Prioridade</th><th>Status</th><th>Analista</th><th>Ação</th></tr></thead>
+      <tbody id="dist-tbody"></tbody>
+    </table>
+    <div class="dist-footer">
+      <span id="dist-info">0 processos</span>
+      <div class="pg-btns" id="dist-pages"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- ════════ DRAWERS ════════ -->
+
+<!-- TRIAGEM DRAWER -->
+<div class="drawer-wrap" id="dw-triagem">
+  <div class="drawer-overlay" onclick="closeDrawer('triagem')"></div>
+  <div class="drawer">
+    <div class="dh"><div class="dh-l"><span class="dh-tag">Passo 1</span><span class="dh-title">Nova Triagem</span><span class="dh-sub">Recepção e classificação do processo</span></div><button class="btn-x" onclick="closeDrawer('triagem')">✕</button></div>
+    <div class="dp-bar"><div class="dp-fill" id="dp-tri" style="width:0%"></div></div>
+    <div class="drawer-body">
+      <div class="fg">
+        <div class="fg-title">Empresa</div>
+        <div class="frow">
+          <div class="field full">
+            <label><span class="fnum">1</span> Empresa <span class="req">*</span></label>
+            <div class="radio-group">
+              <label class="radio-opt selected" id="ro-sompo" onclick="selEmp('Sompo')"><input type="radio" name="emp" value="Sompo" checked><span class="radio-dot"></span>Sompo</label>
+              <label class="radio-opt" id="ro-hdi" onclick="selEmp('HDI')"><input type="radio" name="emp" value="HDI"><span class="radio-dot"></span>HDI</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="fg">
+        <div class="fg-title">Identificação</div>
+        <div class="frow">
+          <div class="field"><label><span class="fnum">2</span> Nº do Processo <span class="req">*</span></label><input type="text" id="t-num" placeholder="0000000-00.0000.0.00.0000" oninput="updTri()"></div>
+          <div class="field"><label><span class="fnum">3</span> Parte Adversa <span class="req">*</span></label><input type="text" id="t-parte" placeholder="Nome da parte adversa" oninput="updTri()"></div>
+        </div>
+      </div>
+      <div class="fg">
+        <div class="fg-title">Valores</div>
+        <div class="frow">
+          <div class="field"><label><span class="fnum">4</span> Valor da Apólice <span class="req">*</span></label><input type="text" id="t-apolice" placeholder="R$ 0,00" oninput="fmtV(this);chkRegra();updTri()"></div>
+          <div class="field"><label><span class="fnum">5</span> Valor da Causa <span class="req">*</span></label><input type="text" id="t-causa" placeholder="R$ 0,00" oninput="fmtV(this);updTri()"></div>
+        </div>
+        <div id="tri-alerta" style="display:none;margin-top:.25rem"></div>
+      </div>
+      <div class="fg">
+        <div class="fg-title">Dados complementares</div>
+        <div class="frow">
+          <div class="field"><label><span class="fnum">6</span> Data de Recebimento <span class="req">*</span></label><input type="date" id="t-data" oninput="updTri()"></div>
+          <div class="field"><label><span class="fnum">7</span> Nº Sinistro</label><input type="text" id="t-sinistro" placeholder="Ex.: 1229810"></div>
+        </div>
+        <div class="frow"><div class="field full"><label><span class="fnum">8</span> Observações</label><textarea id="t-obs" placeholder="Informações adicionais..."></textarea></div></div>
+      </div>
+      <div id="tri-fluxo" style="display:none"></div>
+    </div>
+    <div class="drawer-foot">
+      <span class="foot-note" id="fn-tri">0 de 5 campos obrigatórios</span>
+      <div class="foot-actions">
+        <button class="btn-cancel" onclick="closeDrawer('triagem')">Cancelar</button>
+        <button class="btn-save" onclick="salvarTri()">Salvar e Encaminhar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CAPA DRAWER -->
+<div class="drawer-wrap" id="dw-capa">
+  <div class="drawer-overlay" onclick="closeDrawer('capa')"></div>
+  <div class="drawer">
+    <div class="dh"><div class="dh-l"><span class="dh-tag">Operação 1/5</span><span class="dh-title">Capa</span><span class="dh-sub">15 campos obrigatórios</span></div><button class="btn-x" onclick="closeDrawer('capa')">✕</button></div>
+    <div class="dp-bar"><div class="dp-fill" id="dp-capa" style="width:0%"></div></div>
+    <div class="drawer-body">
+      <div class="fg"><div class="fg-title">Informações gerais</div>
+        <div class="frow">
+          <div class="field"><label><span class="fnum">1</span> Filial <span class="req">*</span></label><select id="c-filial" onchange="updOp('capa')"><option value="">Selecione...</option><option>Matriz</option><option>Filial SP</option></select></div>
+          <div class="field"><label><span class="fnum">2</span> Data Citação <span class="req">*</span></label><input type="date" id="c-dcit" onchange="updOp('capa')"></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label><span class="fnum">3</span> Centro de Custo <span class="req">*</span></label><select id="c-cc" onchange="updOp('capa')"><option value="">Selecione...</option><option>Superintendência Jurídica</option><option>Contencioso Cível</option><option>Contencioso Trabalhista</option></select></div>
+          <div class="field"><label><span class="fnum">4</span> Categoria <span class="req">*</span></label><select id="c-cat" onchange="updOp('capa')"><option value="">Selecione...</option><option>Cível</option><option>Trabalhista</option><option>Tributário</option></select></div>
+        </div>
+      </div>
+      <div class="fg"><div class="fg-title">Natureza e tipo</div>
+        <div class="frow">
+          <div class="field"><label><span class="fnum">5</span> Natureza <span class="req">*</span></label><select id="c-nat" onchange="updOp('capa')"><option value="">Selecione...</option><option>Judicial</option><option>Administrativa</option></select></div>
+          <div class="field"><label><span class="fnum">6</span> Tipo Processo <span class="req">*</span></label><select id="c-tp" onchange="updOp('capa')"><option value="">Selecione...</option><option>Ativo</option><option>Passivo</option></select></div>
+          <div class="field"><label><span class="fnum">7</span> Grupo de Ramo <span class="req">*</span></label><select id="c-ramo" onchange="updOp('capa')"><option value="">Selecione...</option><option>Transportes</option><option>Automóvel</option><option>Vida</option><option>Patrimonial</option></select></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label><span class="fnum">8</span> Tipo <span class="req">*</span></label><select id="c-tp2" onchange="updOp('capa')"><option value="">Selecione...</option><option>Cobrança</option><option>Indenizatório</option><option>Revisional</option></select></div>
+          <div class="field"><label><span class="fnum">9</span> Risco <span class="req">*</span></label><select id="c-risco" onchange="updOp('capa')"><option value="">Selecione...</option><option>Remoto</option><option>Possível</option><option>Provável</option></select></div>
+          <div class="field"><label><span class="fnum">10</span> Fase <span class="req">*</span></label><select id="c-fase" onchange="updOp('capa')"><option value="">Selecione...</option><option>Instrutória</option><option>Decisória</option><option>Recursal</option></select></div>
+        </div>
+      </div>
+      <div class="fg"><div class="fg-title">Identificação e valores</div>
+        <div class="frow">
+          <div class="field"><label><span class="fnum">11</span> Departamento <span class="req">*</span></label><select id="c-dep" onchange="updOp('capa')"><option value="">Selecione...</option><option>Jurídico</option><option>Compliance</option></select></div>
+          <div class="field"><label><span class="fnum">12</span> Data base (Ajuizado) <span class="req">*</span></label><input type="date" id="c-db" onchange="updOp('capa')"></div>
+          <div class="field"><label><span class="fnum">13</span> Valor da Causa <span class="req">*</span></label><input type="text" id="c-vc" placeholder="R$ 0,00" oninput="fmtV(this);updOp('capa')"></div>
+        </div>
+        <div class="frow"><div class="field full"><label><span class="fnum">14</span> Observações <span class="req">*</span></label><textarea id="c-obs" placeholder="Ex.: Apólice / Sinistro" onkeyup="updOp('capa')"></textarea></div></div>
+        <div class="frow"><div class="field full"><label><span class="fnum">15</span> Palavra-chave <span class="req">*</span></label><input type="text" id="c-pk" placeholder="Ex.: Citação DJE" oninput="updOp('capa')"></div></div>
+      </div>
+    </div>
+    <div class="drawer-foot"><span class="foot-note" id="fn-capa">0 de 15 campos</span><div class="foot-actions"><button class="btn-cancel" onclick="closeDrawer('capa')">Cancelar</button><button class="btn-save" onclick="saveOp('capa')">Salvar Capa</button></div></div>
+  </div>
+</div>
+
+<!-- PROCESSO DRAWER -->
+<div class="drawer-wrap" id="dw-processo">
+  <div class="drawer-overlay" onclick="closeDrawer('processo')"></div>
+  <div class="drawer">
+    <div class="dh"><div class="dh-l"><span class="dh-tag">Operação 2/5</span><span class="dh-title">Processo</span><span class="dh-sub">15 campos obrigatórios</span></div><button class="btn-x" onclick="closeDrawer('processo')">✕</button></div>
+    <div class="dp-bar"><div class="dp-fill" id="dp-processo" style="width:0%"></div></div>
+    <div class="drawer-body">
+      <div class="fg"><div class="fg-title">Identificação</div>
+        <div class="frow">
+          <div class="field"><label><span class="fnum">1</span> Nome <span class="req">*</span></label><input type="text" id="p-nome" placeholder="Processo Inicial" oninput="updOp('processo')"></div>
+          <div class="field"><label><span class="fnum">2</span> Principal <span class="req">*</span></label><select id="p-princ" onchange="updOp('processo')"><option value="">Selecione...</option><option>Sim</option><option>Não</option></select></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label><span class="fnum">3</span> Natureza <span class="req">*</span></label><select id="p-nat" onchange="updOp('processo')"><option value="">Selecione...</option><option>Judicial</option><option>Administrativa</option></select></div>
+          <div class="field"><label><span class="fnum">4</span> Instância <span class="req">*</span></label><select id="p-inst" onchange="updOp('processo')"><option value="">Selecione...</option><option>1ª Instância</option><option>2ª Instância</option><option>Superior</option></select></div>
+          <div class="field"><label><span class="fnum">5</span> Rito <span class="req">*</span></label><select id="p-rito" onchange="updOp('processo')"><option value="">Selecione...</option><option>Ordinário</option><option>Sumário</option><option>Sumaríssimo</option></select></div>
+        </div>
+      </div>
+      <div class="fg"><div class="fg-title">Localização</div>
+        <div class="frow">
+          <div class="field"><label><span class="fnum">6</span> Fase <span class="req">*</span></label><select id="p-fase" onchange="updOp('processo')"><option value="">Selecione...</option><option>Instrutória</option><option>Decisória</option><option>Recursal</option></select></div>
+          <div class="field"><label><span class="fnum">7</span> Órgão <span class="req">*</span></label><input type="text" id="p-orgao" placeholder="Ex.: TJSP" oninput="updOp('processo')"></div>
+          <div class="field"><label><span class="fnum">8</span> UF <span class="req">*</span></label><select id="p-uf" onchange="updOp('processo')"><option value="">Selecione...</option><option>SP</option><option>RJ</option><option>MG</option><option>RS</option><option>PR</option><option>BA</option><option>DF</option></select></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label><span class="fnum">9</span> Comarca <span class="req">*</span></label><input type="text" id="p-comarca" placeholder="Ex.: Santos" oninput="updOp('processo')"></div>
+          <div class="field"><label><span class="fnum">10</span> Já distribuído? <span class="req">*</span></label><select id="p-dist" onchange="updOp('processo')"><option value="">Selecione...</option><option>Sim</option><option>Não</option></select></div>
+        </div>
+      </div>
+      <div class="fg"><div class="fg-title">Foro e numeração</div>
+        <div class="frow">
+          <div class="field"><label><span class="fnum">11</span> Foro <span class="req">*</span></label><input type="text" id="p-foro" placeholder="Ex.: Foro de Santos/SP" oninput="updOp('processo')"></div>
+          <div class="field"><label><span class="fnum">12</span> Juízo <span class="req">*</span></label><input type="text" id="p-juizo" placeholder="Ex.: 1ª Vara Cível" oninput="updOp('processo')"></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label><span class="fnum">13</span> Data <span class="req">*</span></label><input type="date" id="p-data" onchange="updOp('processo')"></div>
+          <div class="field"><label><span class="fnum">14</span> Número único <span class="req">*</span></label><select id="p-nunico" onchange="updOp('processo')"><option value="">Selecione...</option><option>Sim</option><option>Não</option></select></div>
+          <div class="field"><label><span class="fnum">15</span> Nº Processo <span class="req">*</span></label><input type="text" id="p-num" placeholder="0000000-00.0000.0.00.0000" oninput="updOp('processo')"></div>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-foot"><span class="foot-note" id="fn-processo">0 de 15 campos</span><div class="foot-actions"><button class="btn-cancel" onclick="closeDrawer('processo')">Cancelar</button><button class="btn-save" onclick="saveOp('processo')">Salvar Processo</button></div></div>
+  </div>
+</div>
+
+<!-- ANDAMENTO DRAWER -->
+<div class="drawer-wrap" id="dw-andamento">
+  <div class="drawer-overlay" onclick="closeDrawer('andamento')"></div>
+  <div class="drawer">
+    <div class="dh"><div class="dh-l"><span class="dh-tag">Operação 3/5</span><span class="dh-title">Andamento</span><span class="dh-sub">3 campos por andamento</span></div><button class="btn-x" onclick="closeDrawer('andamento')">✕</button></div>
+    <div class="dp-bar"><div class="dp-fill" id="dp-andamento" style="width:0%"></div></div>
+    <div class="drawer-body">
+      <div class="rep-section" id="and-box"></div>
+      <button class="btn-add" onclick="addRep('andamento')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar andamento</button>
+    </div>
+    <div class="drawer-foot"><span class="foot-note" id="fn-andamento">Nenhum andamento</span><div class="foot-actions"><button class="btn-cancel" onclick="closeDrawer('andamento')">Cancelar</button><button class="btn-save" onclick="saveOp('andamento')">Salvar</button></div></div>
+  </div>
+</div>
+
+<!-- DOCUMENTOS DRAWER -->
+<div class="drawer-wrap" id="dw-documentos">
+  <div class="drawer-overlay" onclick="closeDrawer('documentos')"></div>
+  <div class="drawer">
+    <div class="dh"><div class="dh-l"><span class="dh-tag">Operação 4/5</span><span class="dh-title">Documentos</span><span class="dh-sub">3 campos por documento</span></div><button class="btn-x" onclick="closeDrawer('documentos')">✕</button></div>
+    <div class="dp-bar"><div class="dp-fill" id="dp-documentos" style="width:0%"></div></div>
+    <div class="drawer-body">
+      <div class="rep-section" id="doc-box"></div>
+      <button class="btn-add" onclick="addRep('documentos')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar documento</button>
+    </div>
+    <div class="drawer-foot"><span class="foot-note" id="fn-documentos">Nenhum documento</span><div class="foot-actions"><button class="btn-cancel" onclick="closeDrawer('documentos')">Cancelar</button><button class="btn-save" onclick="saveOp('documentos')">Salvar</button></div></div>
+  </div>
+</div>
+
+<!-- PARTICIPANTES DRAWER -->
+<div class="drawer-wrap" id="dw-participantes">
+  <div class="drawer-overlay" onclick="closeDrawer('participantes')"></div>
+  <div class="drawer">
+    <div class="dh"><div class="dh-l"><span class="dh-tag">Operação 5/5</span><span class="dh-title">Participantes</span><span class="dh-sub">5 campos por participante — mín. 4</span></div><button class="btn-x" onclick="closeDrawer('participantes')">✕</button></div>
+    <div class="dp-bar"><div class="dp-fill" id="dp-participantes" style="width:0%"></div></div>
+    <div class="drawer-body">
+      <div class="rep-section" id="part-box"></div>
+      <button class="btn-add" onclick="addRep('participantes')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Adicionar participante</button>
+    </div>
+    <div class="drawer-foot"><span class="foot-note" id="fn-participantes">Nenhum participante</span><div class="foot-actions"><button class="btn-cancel" onclick="closeDrawer('participantes')">Cancelar</button><button class="btn-save" onclick="saveOp('participantes')">Salvar</button></div></div>
+  </div>
+</div>
+
+<!-- ════════ MODAL DISTRIBUIÇÃO ════════ -->
+<div class="modal-wrap" id="modal-dist">
+  <div class="modal-overlay" onclick="closeModal('dist')"></div>
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-head-l">
+        <h3>Atribuir Processo</h3>
+        <p id="modal-dist-sub">Preencha os dados da distribuição</p>
+      </div>
+      <button class="btn-x" style="background:var(--off);color:var(--ch)" onclick="closeModal('dist')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="proc-preview" id="modal-dist-preview"></div>
+      <div class="fg" style="background:var(--off)">
+        <div class="fg-title">Dados da atribuição</div>
+        <div class="frow">
+          <div class="field">
+            <label>Analista Responsável <span class="req">*</span></label>
+            <select id="m-analista"><option value="">— Selecionar analista —</option></select>
+          </div>
+          <div class="field">
+            <label>Data Prazo <span class="req">*</span></label>
+            <input type="date" id="m-prazo">
+          </div>
+        </div>
+        <div class="field">
+          <label>Prioridade <span class="req">*</span></label>
+          <div class="pri-select-group">
+            <div class="pri-opt alta" id="pri-alta" onclick="selPri('alta')">Alta</div>
+            <div class="pri-opt media" id="pri-media" onclick="selPri('media')">Média</div>
+            <div class="pri-opt normal sel" id="pri-normal" onclick="selPri('normal')">Normal</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Observação</label>
+          <textarea id="m-obs" placeholder="Instruções para o analista..." style="min-height:80px"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal('dist')">Cancelar</button>
+      <button class="btn-save" onclick="confirmarAtrib()">Confirmar Atribuição</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ MODAL E-MAIL HDI ════════ -->
+<div class="modal-wrap" id="modal-email">
+  <div class="modal-overlay" onclick="closeModal('email')"></div>
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-head-l">
+        <h3>E-mail enviado para HDI</h3>
+        <p>Processo aprovado — notificação disparada automaticamente</p>
+      </div>
+      <button class="btn-x" style="background:var(--off);color:var(--ch)" onclick="closeModal('email')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert ok">
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        <div><strong>Aprovado com sucesso.</strong> O e-mail abaixo foi gerado e enviado para a HDI. O processo foi encaminhado para a fila de Distribuição.</div>
+      </div>
+      <div>
+        <div class="email-field"><label>Para</label><input type="text" value="operacoes@hdi.com.br" readonly style="background:var(--off);color:var(--ch)"></div>
+        <div class="email-field"><label>Assunto</label><input type="text" id="email-assunto" readonly style="background:var(--off);color:var(--ch)"></div>
+        <div class="email-field"><label>Corpo do e-mail</label><div class="email-preview" id="email-body"></div></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-save" onclick="closeModal('email')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+let empSel = 'Sompo';
+let triList = [], hdiList = [], distList = [];
+let andCnt = 0, docCnt = 0, partCnt = 0;
+let distPage = 1;
+const PER = 8;
+let modalProcId = null;
+let priSel = 'normal';
+
+const ANALISTAS = ['Ana Lima','Bruno Carvalho','Carla Mendes','Diego Santos','Elisa Torres','Felipe Rocha'];
+const opSt = {
+  capa:        { saved:false, filled:0, total:15 },
+  processo:    { saved:false, filled:0, total:15 },
+  andamento:   { saved:false },
+  documentos:  { saved:false },
+  participantes:{ saved:false },
+};
+
+// ── NAVEGAÇÃO ──────────────────────────────────────────────────────────────
+const PAGE_NAMES = { triagem:'Triagem', hdi:'Análise HDI', operacao:'Operação', distribuicao:'Distribuição' };
+function goView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  document.getElementById('tb-page').textContent = PAGE_NAMES[id] || 'Gestão de Processos';
+  const bc = document.getElementById('breadcrumb');
+  bc.innerHTML = `<span onclick="goHome()">Início</span><span class="sep">›</span><span class="active">${PAGE_NAMES[id]||id}</span>`;
+  if (id === 'distribuicao') renderDist();
+  if (id === 'hdi') renderHDI();
+  window.scrollTo(0,0);
+}
+function goHome() {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-home').classList.add('active');
+  document.getElementById('tb-page').textContent = 'Gestão de Processos';
+  document.getElementById('breadcrumb').innerHTML = '<span class="active">Início</span>';
+  updKPIs();
+}
+
+// ── DRAWERS & MODALS ───────────────────────────────────────────────────────
+function openDrawer(id) { document.getElementById('dw-' + id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeDrawer(id) { document.getElementById('dw-' + id).classList.remove('open'); document.body.style.overflow=''; }
+function openModal(id) { document.getElementById('modal-' + id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeModal(id) { document.getElementById('modal-' + id).classList.remove('open'); document.body.style.overflow=''; }
+
+// ── TOAST ──────────────────────────────────────────────────────────────────
+function toast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── FORMATO ───────────────────────────────────────────────────────────────
+function fmtV(el) {
+  let v = el.value.replace(/\D/g,''); if (!v) { el.value=''; return; }
+  el.value = 'R$ ' + (parseInt(v)/100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function parseBRL(s) { return parseFloat((s||'').replace(/[R$\s.]/g,'').replace(',','.')) || 0; }
+function fmtDate(d) { if (!d) return '—'; const [y,m,dd]=d.split('-'); return `${dd}/${m}/${y}`; }
+
+// ── TRIAGEM ────────────────────────────────────────────────────────────────
+function selEmp(e) {
+  empSel = e;
+  document.getElementById('ro-sompo').classList.toggle('selected', e==='Sompo');
+  document.getElementById('ro-hdi').classList.toggle('selected', e==='HDI');
+  chkRegra(); updTri();
+}
+
+function chkRegra() {
+  const alEl = document.getElementById('tri-alerta');
+  const flEl = document.getElementById('tri-fluxo');
+  const val  = parseBRL(document.getElementById('t-apolice').value);
+  const LIMITE = 30000000;
+
+  if (empSel === 'HDI') {
+    alEl.style.display='none';
+    flEl.style.display='block';
+    flEl.innerHTML=`<div class="alert hdi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><div><strong>Fluxo HDI ativado.</strong> Este processo será encaminhado para a fila de <strong>Análise HDI</strong>, onde o gestor/supervisor deverá aprovar ou reprovar.</div></div>`;
+  } else if (val > LIMITE) {
+    alEl.style.display='block';
+    alEl.innerHTML=`<div class="alert warn"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><div><strong>Regra Sompo:</strong> Valor acima de R$ 30.000.000,00. Este processo será encaminhado para <strong>Operação</strong>.</div></div>`;
+    flEl.style.display='block';
+    flEl.innerHTML=`<div class="alert ok"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/></svg><div>Destino: <strong>Operação (cadastro Benner)</strong></div></div>`;
+  } else {
+    alEl.style.display='none';
+    flEl.style.display='block';
+    flEl.innerHTML=`<div class="alert info"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div>Destino: <strong>Distribuição</strong></div></div>`;
+  }
+}
+
+function updTri() {
+  const ids = ['t-num','t-parte','t-apolice','t-causa','t-data'];
+  const f = ids.filter(id => document.getElementById(id).value.trim()).length;
+  document.getElementById('dp-tri').style.width = Math.round(f/5*100)+'%';
+  document.getElementById('fn-tri').textContent = f + ' de 5 campos obrigatórios';
+}
+
+function salvarTri() {
+  const num   = document.getElementById('t-num').value.trim();
+  const parte = document.getElementById('t-parte').value.trim();
+  const apolice = document.getElementById('t-apolice').value.trim();
+  const causa = document.getElementById('t-causa').value.trim();
+  const data  = document.getElementById('t-data').value;
+  if (!num||!parte||!apolice||!causa||!data) { toast('Preencha todos os campos obrigatórios'); return; }
+
+  const val = parseBRL(apolice);
+  let destino;
+  if (empSel === 'HDI') destino = 'Análise HDI';
+  else if (val > 30000000) destino = 'Operação';
+  else destino = 'Distribuição';
+
+  const proc = {
+    id: Date.now() + Math.random(),
+    num, parte, empresa: empSel, valorApolice: apolice, valorCausa: causa,
+    data, destino, status: 'Pendente', analista:'', prazo:'', prioridade:'Normal', obs:'',
+    sinistro: document.getElementById('t-sinistro').value
+  };
+
+  triList.push(proc);
+  if (destino === 'Análise HDI') hdiList.push({...proc, hdiStatus:'Aguardando'});
+  if (destino === 'Distribuição') distList.push({...proc});
+
+  renderTriTable(); updKPIs(); closeDrawer('triagem');
+  toast(`Processo encaminhado para ${destino}`);
+
+  // reset
+  ['t-num','t-parte','t-apolice','t-causa','t-data','t-sinistro','t-obs'].forEach(id => document.getElementById(id).value='');
+  empSel='Sompo'; selEmp('Sompo');
+  document.getElementById('tri-alerta').style.display='none';
+  document.getElementById('tri-fluxo').style.display='none';
+  document.getElementById('dp-tri').style.width='0%';
+  document.getElementById('fn-tri').textContent='0 de 5 campos obrigatórios';
+}
+
+function renderTriTable() {
+  const tbody = document.getElementById('tri-tbody');
+  if (!triList.length) {
+    tbody.innerHTML='<tr><td colspan="6" class="tbl-empty"><strong>Nenhuma triagem registrada</strong>Clique em "+ Nova Triagem" para começar.</td></tr>'; return;
+  }
+  const stCls = {Operação:'analise','Análise HDI':'hdi-badge',Distribuição:'pendente'};
+  tbody.innerHTML = triList.map(p=>`
+    <tr>
+      <td>${p.parte}<span class="proc-num">${p.num}</span></td>
+      <td><span class="emp-b ${p.empresa.toLowerCase()}">${p.empresa}</span></td>
+      <td class="val-cell">${p.valorApolice}</td>
+      <td><span class="st-badge ${p.destino==='Análise HDI'?'analise':p.destino==='Operação'?'analise':'pendente'}">${p.destino}</span></td>
+      <td>${fmtDate(p.data)}</td>
+      <td><button class="btn-atrib" onclick="goView('${p.destino==='Análise HDI'?'hdi':p.destino==='Operação'?'operacao':'distribuicao'}')">Abrir ${p.destino}</button></td>
+    </tr>`).join('');
+}
+
+// ── HDI ────────────────────────────────────────────────────────────────────
+function renderHDI() {
+  const tbody = document.getElementById('hdi-tbody');
+  const pending = hdiList.filter(p => p.hdiStatus === 'Aguardando');
+  const done    = hdiList.filter(p => p.hdiStatus !== 'Aguardando');
+  const all = [...pending, ...done];
+  if (!all.length) {
+    tbody.innerHTML='<tr><td colspan="6" class="tbl-empty"><strong>Nenhum processo HDI pendente</strong>Os processos HDI aparecerão aqui após a triagem.</td></tr>'; return;
+  }
+  tbody.innerHTML = all.map(p => {
+    const isPend = p.hdiStatus === 'Aguardando';
+    const stBadge = p.hdiStatus==='Aprovado'?'<span class="st-badge concluido"><span class="dot"></span>Aprovado</span>':p.hdiStatus==='Reprovado'?'<span class="st-badge reprovado"><span class="dot"></span>Reprovado</span>':'<span class="st-badge pendente"><span class="dot"></span>Aguardando</span>';
+    const acoes = isPend
+      ? `<button class="btn-apr" onclick="hdiAprovar(${p.id})">Aprovar (Sim)</button><button class="btn-rep" onclick="hdiReprovar(${p.id})">Reprovar (Não)</button>`
+      : `<span style="font-size:12px;color:var(--ch2);font-style:italic">${p.hdiStatus === 'Aprovado' ? 'E-mail enviado' : 'Encaminhado para Operação'}</span>`;
+    return `<tr>
+      <td>${p.parte}<span class="proc-num">${p.num}</span></td>
+      <td class="val-cell">${p.valorApolice}</td>
+      <td class="val-cell">${p.valorCausa}</td>
+      <td>${fmtDate(p.data)}</td>
+      <td>${stBadge}</td>
+      <td>${acoes}</td>
+    </tr>`;
+  }).join('');
+}
+
+function hdiAprovar(id) {
+  const p = hdiList.find(x => x.id === id);
+  if (!p) return;
+  p.hdiStatus = 'Aprovado';
+  // Adiciona para Distribuição
+  distList.push({...p, status:'Pendente', analista:'', prazo:'', prioridade:'Normal', obs:''});
+  renderHDI(); updKPIs();
+  // Abre modal de e-mail
+  document.getElementById('email-assunto').value = `Novo processo recebido — ${p.num}`;
+  document.getElementById('email-body').textContent =
+`Prezada equipe HDI,
+
+Informamos que o processo abaixo foi recebido e está sendo tratado internamente:
+
+Processo: ${p.num}
+Parte adversa: ${p.parte}
+Valor da apólice: ${p.valorApolice}
+Valor da causa: ${p.valorCausa}
+Data de recebimento: ${fmtDate(p.data)}
+
+O processo foi aprovado e encaminhado para distribuição entre os analistas responsáveis.
+
+Atenciosamente,
+Equipe SBK Legal Operations`;
+  openModal('email');
+}
+
+function hdiReprovar(id) {
+  const p = hdiList.find(x => x.id === id);
+  if (!p) return;
+  p.hdiStatus = 'Reprovado';
+  renderHDI(); updKPIs();
+  toast('Processo reprovado — encaminhado para Operação');
+}
+
+// ── OPERAÇÃO ──────────────────────────────────────────────────────────────
+const OP_IDS = {
+  capa:    ['c-filial','c-dcit','c-cc','c-cat','c-nat','c-tp','c-ramo','c-tp2','c-risco','c-fase','c-dep','c-db','c-vc','c-obs','c-pk'],
+  processo:['p-nome','p-princ','p-nat','p-inst','p-rito','p-fase','p-orgao','p-uf','p-comarca','p-dist','p-foro','p-juizo','p-data','p-nunico','p-num'],
+};
+function updOp(sec) {
+  if (OP_IDS[sec]) {
+    const f = OP_IDS[sec].filter(id => { const el=document.getElementById(id); return el&&el.value&&el.value.trim(); }).length;
+    const tot = OP_IDS[sec].length;
+    const pct = Math.round(f/tot*100);
+    opSt[sec].filled = f;
+    document.getElementById('dp-'+sec).style.width = pct+'%';
+    document.getElementById('fn-'+sec).textContent = f+' de '+tot+' campos';
+    document.getElementById('of-'+sec).style.width = pct+'%';
+    document.getElementById('op-'+sec).textContent = pct+'%';
+  }
+  updGlobalProg();
+}
+function updRepOp(sec) {
+  const box = sec==='andamento'?'and-box':sec==='documentos'?'doc-box':'part-box';
+  const inputs = document.getElementById(box).querySelectorAll('input,select,textarea');
+  const f = Array.from(inputs).filter(i=>i.value&&i.value.trim()).length;
+  const tot = inputs.length;
+  const pct = tot>0?Math.round(f/tot*100):0;
+  document.getElementById('dp-'+sec).style.width=pct+'%';
+  document.getElementById('of-'+sec).style.width=pct+'%';
+  document.getElementById('op-'+sec).textContent=pct+'%';
+  const cnt = sec==='andamento'?andCnt:sec==='documentos'?docCnt:partCnt;
+  const lbl = sec==='andamento'?'andamento(s)':sec==='documentos'?'documento(s)':'participante(s)';
+  document.getElementById('fn-'+sec).textContent = cnt+' '+lbl+' — '+f+'/'+tot+' campos';
+  updGlobalProg();
+}
+function saveOp(sec) {
+  opSt[sec].saved=true;
+  const card = document.querySelector(`[onclick="openDrawer('${sec}')"]`);
+  const pill = document.getElementById('os-'+sec);
+  if(card) card.classList.add('done');
+  if(pill) { pill.textContent='Concluído'; pill.className='s-pill done'; }
+  document.getElementById('of-'+sec).style.width='100%';
+  document.getElementById('op-'+sec).textContent='100%';
+  closeDrawer(sec); updGlobalProg();
+  toast('Seção "'+sec.charAt(0).toUpperCase()+sec.slice(1)+'" salva');
+}
+function updGlobalProg() {
+  const capaF = opSt.capa.saved?15:opSt.capa.filled;
+  const procF = opSt.processo.saved?15:opSt.processo.filled;
+  const tot = capaF+procF+(andCnt*3)+(docCnt*3)+(partCnt*5);
+  const pct = Math.min(100,Math.round(tot/56*100));
+  document.getElementById('pg-fill').style.width=pct+'%';
+  document.getElementById('pg-count').textContent=tot+' / 56 campos';
+  document.getElementById('hf-op').style.width=pct+'%';
+  document.getElementById('hl-op').textContent=tot+' / 56';
+}
+
+// ── REPEAT ────────────────────────────────────────────────────────────────
+function addRep(sec) {
+  let box, html, idx;
+  if (sec==='andamento') { andCnt++; idx=andCnt; box='and-box';
+    html=`<div class="rep-item" id="and-${idx}"><div class="rep-head"><span class="rep-label"><span class="fnum">${idx}</span> Andamento #${idx}</span><button class="btn-rem" onclick="remRep('andamento',${idx})">Remover</button></div>
+    <div class="frow">
+      <div class="field"><label>Tipo <span class="req">*</span></label><select onchange="updRepOp('andamento')"><option value="">Selecione...</option><option>Citação</option><option>Intimação</option><option>Audiência</option><option>Decisão</option><option>Sentença</option><option>Acórdão</option></select></div>
+      <div class="field"><label>Recebimento <span class="req">*</span></label><input type="date" onchange="updRepOp('andamento')"></div>
+      <div class="field"><label>Data Andamento <span class="req">*</span></label><input type="date" onchange="updRepOp('andamento')"></div>
+    </div></div>`;
+  }
+  if (sec==='documentos') { docCnt++; idx=docCnt; box='doc-box';
+    html=`<div class="rep-item" id="doc-${idx}"><div class="rep-head"><span class="rep-label"><span class="fnum">${idx}</span> Documento #${idx}</span><button class="btn-rem" onclick="remRep('documentos',${idx})">Remover</button></div>
+    <div class="frow">
+      <div class="field"><label>Nome <span class="req">*</span></label><input type="text" placeholder="Nome do documento" oninput="updRepOp('documentos')"></div>
+      <div class="field"><label>Tipo <span class="req">*</span></label><select onchange="updRepOp('documentos')"><option value="">Selecione...</option><option>Inicial</option><option>Contestação</option><option>Recurso</option><option>Procuração</option><option>Laudo</option></select></div>
+      <div class="field"><label>Arquivo <span class="req">*</span></label><input type="text" placeholder="arquivo.pdf" oninput="updRepOp('documentos')"></div>
+    </div></div>`;
+  }
+  if (sec==='participantes') { partCnt++; idx=partCnt; box='part-box';
+    html=`<div class="rep-item" id="part-${idx}"><div class="rep-head"><span class="rep-label"><span class="fnum">${idx}</span> Participante #${idx}</span><button class="btn-rem" onclick="remRep('participantes',${idx})">Remover</button></div>
+    <div class="frow"><div class="field full"><label>Nome / Entidade <span class="req">*</span></label><input type="text" placeholder="Nome completo ou razão social" oninput="updRepOp('participantes')"></div></div>
+    <div class="frow">
+      <div class="field"><label>Classe <span class="req">*</span></label><select onchange="updRepOp('participantes')"><option value="">Selecione...</option><option>Cliente</option><option>Adverso</option><option>Terceiro</option><option>Advogado</option></select></div>
+      <div class="field"><label>Condição <span class="req">*</span></label><select onchange="updRepOp('participantes')"><option value="">Selecione...</option><option>Autor</option><option>Réu</option><option>Advogado Interno</option><option>Escritório</option></select></div>
+      <div class="field"><label>Qualificação <span class="req">*</span></label><select onchange="updRepOp('participantes')"><option value="">Selecione...</option><option>Autor</option><option>Réu</option><option>Litisconsorte</option></select></div>
+      <div class="field"><label>Principal <span class="req">*</span></label><select onchange="updRepOp('participantes')"><option value="">Selecione...</option><option>Sim</option><option>Não</option></select></div>
+    </div></div>`;
+  }
+  document.getElementById(box).insertAdjacentHTML('beforeend', html);
+  updRepOp(sec);
+}
+function remRep(sec, idx) {
+  const pref=sec==='andamento'?'and':sec==='documentos'?'doc':'part';
+  const el=document.getElementById(pref+'-'+idx); if(el) el.remove();
+  if(sec==='andamento') andCnt=Math.max(0,andCnt-1);
+  if(sec==='documentos') docCnt=Math.max(0,docCnt-1);
+  if(sec==='participantes') partCnt=Math.max(0,partCnt-1);
+  updRepOp(sec);
+}
+
+// ── DISTRIBUIÇÃO ───────────────────────────────────────────────────────────
+function addDemo() {
+  const partes=['BRJ Logística LTDA','Auto Peças Silva S/A','Trans Norte LTDA','Log Brasil S/A'];
+  const emps=['Sompo','HDI'];
+  const e=emps[Math.floor(Math.random()*emps.length)];
+  const val=(Math.random()*50000000).toFixed(2);
+  distList.push({
+    id:Date.now()+Math.random(),
+    num:`${Math.floor(Math.random()*9e6+1e6)}-${Math.floor(Math.random()*90+10)}.2026.8.26.0562`,
+    parte:partes[Math.floor(Math.random()*partes.length)],
+    empresa:e, valorApolice:'R$ '+parseFloat(val).toLocaleString('pt-BR',{minimumFractionDigits:2}),
+    status:'Pendente', analista:'', prazo:'', prioridade:'Normal', obs:''
+  });
+  renderDist(); updKPIs(); toast('Processo demo adicionado');
+}
+
+function renderDist() {
+  const search = document.getElementById('d-search').value.toLowerCase();
+  const fEmp   = document.getElementById('d-femp').value;
+  const fStat  = document.getElementById('d-fstat').value;
+  let list = distList.filter(p => {
+    const ms = !search || p.num.toLowerCase().includes(search) || p.parte.toLowerCase().includes(search);
+    const me = !fEmp || p.empresa===fEmp;
+    const mt = !fStat || p.status===fStat;
+    return ms&&me&&mt;
+  });
+  const tot=list.length, pen=list.filter(p=>p.status==='Pendente').length, atr=list.filter(p=>p.analista).length;
+  document.getElementById('ds-tot').textContent=tot;
+  document.getElementById('ds-pen').textContent=pen;
+  document.getElementById('ds-atr').textContent=atr;
+  const pages=Math.ceil(tot/PER)||1;
+  if(distPage>pages) distPage=1;
+  const slice=list.slice((distPage-1)*PER, distPage*PER);
+  document.getElementById('dist-info').textContent=`Mostrando ${slice.length} de ${tot} processos`;
+  const pagesEl=document.getElementById('dist-pages'); pagesEl.innerHTML='';
+  for(let i=1;i<=pages;i++) {
+    const b=document.createElement('div'); b.className='pg-btn'+(i===distPage?' active':'');
+    b.textContent=i; b.onclick=()=>{distPage=i;renderDist();}; pagesEl.appendChild(b);
+  }
+  const tbody=document.getElementById('dist-tbody');
+  if(!slice.length) { tbody.innerHTML='<tr><td colspan="7" class="tbl-empty"><strong>Nenhum processo encontrado</strong>Ajuste os filtros ou adicione via Triagem.</td></tr>'; return; }
+  const priCls={Alta:'alta',Média:'media',Normal:'normal'};
+  const stCls={Pendente:'pendente','Em análise':'analise','Concluído':'concluido'};
+  tbody.innerHTML=slice.map(p=>`<tr>
+    <td>${p.parte}<span class="proc-num">${p.num}</span></td>
+    <td><span class="emp-b ${p.empresa.toLowerCase()}">${p.empresa}</span></td>
+    <td class="val-cell">${p.valorApolice}${parseBRL(p.valorApolice)>30000000?'<div class="val-hi"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>&gt;R$30M</div>':''}</td>
+    <td><span class="pr-badge ${priCls[p.prioridade]||'normal'}">${p.prioridade||'Normal'}</span></td>
+    <td><span class="st-badge ${stCls[p.status]||'pendente'}"><span class="dot"></span>${p.status}</span></td>
+    <td style="font-size:12px;color:var(--ch)">${p.analista||'<em style="color:var(--ch2)">Não atribuído</em>'}</td>
+    <td><button class="btn-atrib${p.analista?' done':''}" onclick="${p.analista?'void(0)':`abrirModalDist(${p.id})`}">${p.analista?'Atribuído':'Atribuir'}</button></td>
+  </tr>`).join('');
+
+  // update home mini-progress
+  const totAll=distList.length, atrAll=distList.filter(p=>p.analista).length;
+  const pct=totAll>0?Math.round(atrAll/totAll*100):0;
+  document.getElementById('hf-dist').style.width=pct+'%';
+  document.getElementById('hl-dist').textContent=atrAll+' / '+totAll;
+}
+
+function abrirModalDist(id) {
+  modalProcId = id;
+  const p = distList.find(x=>x.id===id); if(!p) return;
+  document.getElementById('modal-dist-sub').textContent = p.parte + ' — ' + p.num;
+  document.getElementById('modal-dist-preview').innerHTML=`
+    <div class="proc-preview-title">Processo</div>
+    <div class="proc-preview-row"><span>Número</span><strong>${p.num}</strong></div>
+    <div class="proc-preview-row"><span>Parte adversa</span><strong>${p.parte}</strong></div>
+    <div class="proc-preview-row"><span>Empresa</span><strong>${p.empresa}</strong></div>
+    <div class="proc-preview-row"><span>Valor apólice</span><strong>${p.valorApolice}</strong></div>`;
+  // populate analista select
+  const sel = document.getElementById('m-analista');
+  sel.innerHTML = '<option value="">— Selecionar analista —</option>' +
+    ANALISTAS.map(a=>`<option value="${a}" ${p.analista===a?'selected':''}>${a}</option>`).join('');
+  document.getElementById('m-prazo').value = p.prazo||'';
+  document.getElementById('m-obs').value = p.obs||'';
+  priSel = (p.prioridade||'normal').toLowerCase();
+  ['alta','media','normal'].forEach(pr => document.getElementById('pri-'+pr).classList.toggle('sel', pr===priSel));
+  openModal('dist');
+}
+
+function selPri(pr) {
+  priSel = pr;
+  ['alta','media','normal'].forEach(p => document.getElementById('pri-'+p).classList.toggle('sel', p===pr));
+}
+
+function confirmarAtrib() {
+  const analista = document.getElementById('m-analista').value;
+  const prazo    = document.getElementById('m-prazo').value;
+  if (!analista || !prazo) { toast('Selecione analista e data prazo'); return; }
+  const p = distList.find(x=>x.id===modalProcId); if(!p) return;
+  p.analista  = analista;
+  p.prazo     = prazo;
+  p.prioridade= priSel.charAt(0).toUpperCase()+priSel.slice(1);
+  p.obs       = document.getElementById('m-obs').value;
+  p.status    = 'Em análise';
+  closeModal('dist'); renderDist(); updKPIs();
+  toast(`Atribuído para ${analista} — prazo ${fmtDate(prazo)}`);
+}
+
+// ── KPIs ──────────────────────────────────────────────────────────────────
+function updKPIs() {
+  document.getElementById('k-triagem').textContent  = triList.filter(p=>p.destino==='Distribuição'&&!p.analista).length;
+  document.getElementById('k-hdi').textContent      = hdiList.filter(p=>p.hdiStatus==='Aguardando').length;
+  document.getElementById('k-op').textContent       = triList.filter(p=>p.destino==='Operação').length;
+  document.getElementById('k-dist').textContent     = distList.filter(p=>!p.analista).length;
+  document.getElementById('k-conc').textContent     = distList.filter(p=>p.status==='Concluído').length;
+  document.getElementById('hf-triagem').style.width = triList.length>0?'100%':'0%';
+  document.getElementById('hl-triagem').textContent = triList.length;
+  document.getElementById('hf-hdi').style.width     = hdiList.filter(p=>p.hdiStatus!=='Aguardando').length > 0 ? Math.round(hdiList.filter(p=>p.hdiStatus!=='Aguardando').length/Math.max(1,hdiList.length)*100)+'%' : '0%';
+  document.getElementById('hl-hdi').textContent     = hdiList.filter(p=>p.hdiStatus==='Aguardando').length;
+}
+
+updKPIs();
+</script>
+</body>
+</html>
